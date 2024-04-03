@@ -1,0 +1,3 @@
+---
+settings:
+  index.default_pipeline: app-write-reroute-pipeline

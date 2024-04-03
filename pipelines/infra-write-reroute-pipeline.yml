@@ -1,0 +1,14 @@
+---
+processors:
+- pipeline:
+    name: openshift-2-ecs
+    description: Format the Openshift data in ECS
+- set:
+    field: event.dataset
+    value: kubernetes.container_logs
+- reroute:
+    destination: logs-kubernetes.container_logs-openshift.infrastructure
+    if: ctx?.kubernetes?.pod?.name != null
+- drop:
+    if: ctx?.kubernetes?.pod?.name == null
+    description: 'TODO: Do something useful with these logs'

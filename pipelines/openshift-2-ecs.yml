@@ -1,0 +1,120 @@
+---
+processors:
+- rename:
+    field: kubernetes.pod_id
+    target_field: kubernetes.pod.uid
+    ignore_missing: true
+- rename:
+    field: kubernetes.pod_ip
+    target_field: kubernetes.pod.ip
+    ignore_missing: true
+- rename:
+    field: kubernetes.pod_name
+    target_field: kubernetes.pod.name
+    ignore_missing: true
+- rename:
+    field: kubernetes.namespace_name
+    target_field: kubernetes.namespace
+    ignore_missing: true
+- rename:
+    field: kubernetes.namespace_id
+    target_field: kubernetes.namespace_uid
+    ignore_missing: true
+- rename:
+    field: kubernetes.container_id
+    target_field: container.id
+    ignore_missing: true
+- dissect:
+    field: container.id
+    pattern: "%{container.runtime}://%{container.id}"
+    ignore_failure: true
+- rename:
+    field: kubernetes.container_image
+    target_field: container.image.name
+    ignore_missing: true
+- set:
+    field: kubernetes.container.image
+    copy_from: container.imge.name
+    ignore_failure: true
+- set:
+    copy_from: kubernetes.container_name
+    field: container.name
+    ignore_failure: true
+- rename:
+    field: kubernetes.container_name
+    target_field: kubernetes.container.name
+    ignore_missing: true
+- set:
+    field: kubernetes.node.name
+    copy_from: hostname
+    ignore_failure: true
+- rename:
+    field: hostname
+    target_field: host.name
+    ignore_missing: true
+- rename:
+    field: level
+    target_field: log.level
+    ignore_missing: true
+- rename:
+    field: file
+    target_field: log.file.path
+    ignore_missing: true
+- set:
+    copy_from: openshift.cluster_id
+    field: orchestrator.cluster.name
+    ignore_failure: true
+- dissect:
+    field: kubernetes.pod_owner
+    pattern: "%{_tmp.parent_type}/%{_tmp.parent_name}"
+    ignore_missing: true
+- lowercase:
+    field: _tmp.parent_type
+    ignore_missing: true
+- set:
+    field: kubernetes.pod.{{_tmp.parent_type}}.name
+    value: "{{_tmp.parent_name}}"
+    if: ctx?._tmp?.parent_type != null
+    ignore_failure: true
+- remove:
+    field:
+    - _tmp
+    - kubernetes.pod_owner
+    ignore_missing: true
+- script:
+    description: Normalize kubernetes annotations
+    if: ctx?.kubernetes?.annotations != null
+    source: >
+      def keys = new ArrayList(ctx.kubernetes.labels.keySet());
+      for(k in keys) {
+        if (k.startsWith("app_kubernetes_io_component_")) {
+          def sanitizedKey = k.replace("app_kubernetes_io_component_", "app_kubernetes_io_component/");
+          ctx.kubernetes.labels[sanitizedKey] = ctx.kubernetes.labels[k];
+          ctx.kubernetes.labels.remove(k);
+        }
+      }
+- script:
+    description: Normalize kubernetes namespace_labels
+    if: ctx?.kubernetes?.namespace_labels != null
+    source: >
+      def keys = new ArrayList(ctx.kubernetes.namespace_labels.keySet());
+      for(k in keys) {
+        if (k.indexOf(".") >= 0) {
+          def sanitizedKey = k.replace(".", "_");
+          ctx.kubernetes.namespace_labels[sanitizedKey] = ctx.kubernetes.namespace_labels[k];
+          ctx.kubernetes.namespace_labels.remove(k);
+        } 
+      }
+- script:
+    description: Normalize special Kubernetes Labels used in logs-kubernetes.container_logs-1.55.1
+      to determine service.name and service.version
+    if: ctx?.kuberentes?.labels != null
+    source: >
+      def keys = new ArrayList(ctx.kubernetes.labels.keySet());
+      for(k in keys) {
+        if (k.startsWith("app_kubernetes_io_component_")) {
+          def sanitizedKey = k.replace("app_kubernetes_io_component_", "app_kubernetes_io_component/");
+          ctx.kubernetes.labels[sanitizedKey] = ctx.kubernetes.labels[k];
+          ctx.kubernetes.labels.remove(k);
+        }
+      }

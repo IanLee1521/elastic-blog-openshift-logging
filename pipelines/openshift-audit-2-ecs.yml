@@ -1,0 +1,44 @@
+---
+processors:
+- script:
+    description: Move all the 'kubernetes.audit' fields under 'kubernetes.audit'
+      object
+    source: >
+      def audit = [:];
+      def keyToRemove = [];
+      for(k in ctx.keySet()) {
+        if (k.indexOf('_') != 0 && !['@timestamp', 'data_stream', 'openshift', 'event', 'hostname'].contains(k)) {
+          audit[k] = ctx[k];
+          keyToRemove.add(k);
+        }
+      }
+      for(k in keyToRemove) {
+        ctx.remove(k);
+      }
+      ctx.kubernetes=["audit":audit];
+- set:
+    copy_from: openshift.cluster_id
+    field: orchestrator.cluster.name
+    ignore_failure: true
+- set:
+    field: kubernetes.node.name
+    copy_from: hostname
+    ignore_failure: true
+- rename:
+    field: hostname
+    target_field: host.name
+    ignore_missing: true
+- script:
+    if: ctx?.kubernetes?.audit?.annotations != null
+    description: Normalize kubernetes audit annotations field as expected by the
+      Integration
+    source: >
+      def keys = new ArrayList(ctx.kubernetes.audit.annotations.keySet());
+        for(k in keys) {
+          if (k.indexOf(".") >= 0) {
+            def sanitizedKey = k.replace(".", "_");
+            ctx.kubernetes.audit.annotations[sanitizedKey] = ctx.kubernetes.audit.annotations[k];
+            ctx.kubernetes.audit.annotations.remove(k);
+          } 
+        }
+

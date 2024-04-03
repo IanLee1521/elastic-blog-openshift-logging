@@ -1,0 +1,3 @@
+---
+settings:
+  index.default_pipeline: infra-write-reroute-pipeline

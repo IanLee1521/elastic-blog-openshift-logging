@@ -1,0 +1,10 @@
+---
+processors:
+- pipeline:
+    name: openshift-audit-2-ecs
+    description: Format the Openshift data in ECS
+- set:
+    field: event.dataset
+    value: kubernetes.audit_logs
+- reroute:
+    destination: logs-kubernetes.audit_logs-openshift.infrastructure
