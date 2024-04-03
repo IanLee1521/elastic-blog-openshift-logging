@@ -8,8 +8,8 @@ and continue maintaining the pipelines.
 ### Setup
 
 To upload the pipelines and create the indices we can use the 
-[upload.sh](./upload.sh) script:
+[bootstrap.sh](./bootstrap.sh) script:
 
 ```
-ES_URL=https://xxxxxx:9200 ES_USERNAME=myuser ES_PASSWORD=mypassword ./upload.sh
+ES_URL=https://xxxxxx:9200 ES_USERNAME=myuser ES_PASSWORD=mypassword ./bootstrap.sh
 ```
