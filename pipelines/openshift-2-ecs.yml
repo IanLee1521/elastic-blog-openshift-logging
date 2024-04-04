@@ -34,7 +34,7 @@ processors:
     ignore_missing: true
 - set:
     field: kubernetes.container.image
-    copy_from: container.imge.name
+    copy_from: container.image.name
     ignore_failure: true
 - set:
     copy_from: kubernetes.container_name
@@ -103,12 +103,12 @@ processors:
           def sanitizedKey = k.replace(".", "_");
           ctx.kubernetes.namespace_labels[sanitizedKey] = ctx.kubernetes.namespace_labels[k];
           ctx.kubernetes.namespace_labels.remove(k);
-        } 
+        }
       }
 - script:
     description: Normalize special Kubernetes Labels used in logs-kubernetes.container_logs-1.55.1
       to determine service.name and service.version
-    if: ctx?.kuberentes?.labels != null
+    if: ctx?.kubernetes?.labels != null
     source: >
       def keys = new ArrayList(ctx.kubernetes.labels.keySet());
       for(k in keys) {

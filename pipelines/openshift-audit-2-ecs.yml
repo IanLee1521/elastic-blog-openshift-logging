@@ -39,6 +39,5 @@ processors:
             def sanitizedKey = k.replace(".", "_");
             ctx.kubernetes.audit.annotations[sanitizedKey] = ctx.kubernetes.audit.annotations[k];
             ctx.kubernetes.audit.annotations.remove(k);
-          } 
+          }
         }
-
