@@ -4,6 +4,16 @@ This repository contain the code snippets for the blog:
 [Collecting OpenShift container logs using Red Hat’s OpenShift Logging Operator](https://www.elastic.co/blog/openshift-container-logs-red-hat-logging-operator) to public discussion
 and continue maintaining the pipelines.
 
+### Render the Blog
+
+The Markdown version of the (BLOG.md)[./BLOG.md] is generated from the template
+(BLOG.md.j2)(./BLOG.md.j2). Please do not edit the BLOG file directly but first
+the BLOG.md.j2 and then render the template with the following command:
+
+```
+python render_blog.py
+```
+
 
 ### Setup
 
