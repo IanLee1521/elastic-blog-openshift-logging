@@ -131,7 +131,7 @@ PUT _ingest/pipeline/openshift-2-ecs
     {
       "set": {
         "field": "kubernetes.container.image",
-        "copy_from": "container.imge.name",
+        "copy_from": "container.image.name",
         "ignore_failure": true
       }
     },
@@ -225,13 +225,13 @@ PUT _ingest/pipeline/openshift-2-ecs
       "script": {
         "description": "Normalize kubernetes namespace_labels",
         "if": "ctx?.kubernetes?.namespace_labels != null",
-        "source": "def keys = new ArrayList(ctx.kubernetes.namespace_labels.keySet()); for(k in keys) {\n  if (k.indexOf(\".\") >= 0) {\n    def sanitizedKey = k.replace(\".\", \"_\");\n    ctx.kubernetes.namespace_labels[sanitizedKey] = ctx.kubernetes.namespace_labels[k];\n    ctx.kubernetes.namespace_labels.remove(k);\n  } \n}\n"
+        "source": "def keys = new ArrayList(ctx.kubernetes.namespace_labels.keySet()); for(k in keys) {\n  if (k.indexOf(\".\") >= 0) {\n    def sanitizedKey = k.replace(\".\", \"_\");\n    ctx.kubernetes.namespace_labels[sanitizedKey] = ctx.kubernetes.namespace_labels[k];\n    ctx.kubernetes.namespace_labels.remove(k);\n  }\n}\n"
       }
     },
     {
       "script": {
         "description": "Normalize special Kubernetes Labels used in logs-kubernetes.container_logs-1.55.1 to determine service.name and service.version",
-        "if": "ctx?.kuberentes?.labels != null",
+        "if": "ctx?.kubernetes?.labels != null",
         "source": "def keys = new ArrayList(ctx.kubernetes.labels.keySet()); for(k in keys) {\n  if (k.startsWith(\"app_kubernetes_io_component_\")) {\n    def sanitizedKey = k.replace(\"app_kubernetes_io_component_\", \"app_kubernetes_io_component/\");\n    ctx.kubernetes.labels[sanitizedKey] = ctx.kubernetes.labels[k];\n    ctx.kubernetes.labels.remove(k);\n  }\n}\n"
       }
     }
@@ -277,7 +277,7 @@ PUT _ingest/pipeline/openshift-audit-2-ecs
       "script": {
         "if": "ctx?.kubernetes?.audit?.annotations != null",
         "description": "Normalize kubernetes audit annotations field as expected by the Integration",
-        "source": "def keys = new ArrayList(ctx.kubernetes.audit.annotations.keySet());\n  for(k in keys) {\n    if (k.indexOf(\".\") >= 0) {\n      def sanitizedKey = k.replace(\".\", \"_\");\n      ctx.kubernetes.audit.annotations[sanitizedKey] = ctx.kubernetes.audit.annotations[k];\n      ctx.kubernetes.audit.annotations.remove(k);\n    } \n  }\n"
+        "source": "def keys = new ArrayList(ctx.kubernetes.audit.annotations.keySet());\n  for(k in keys) {\n    if (k.indexOf(\".\") >= 0) {\n      def sanitizedKey = k.replace(\".\", \"_\");\n      ctx.kubernetes.audit.annotations[sanitizedKey] = ctx.kubernetes.audit.annotations[k];\n      ctx.kubernetes.audit.annotations.remove(k);\n    }\n  }\n"
       }
     }
   ]
