@@ -1,0 +1,22 @@
+kind: ClusterLogForwarder
+apiVersion: logging.openshift.io/v1
+metadata:
+  name: instance
+  namespace: openshift-logging
+spec:
+  outputs:
+    - name: remote-elasticsearch
+      secret:
+        name: elasticsearch-password
+      type: elasticsearch
+      url: 'https://YOUR_ELASTICSEARCH_URL:443'
+      elasticsearch:
+        version: 8 # The default is version 6 with the _type field
+  pipelines:
+    - inputRefs:
+        - application
+        - audit
+        # - infrastructure # Add this line if you need these logs
+      name: enable-default-log-store
+      outputRefs:
+        - remote-elasticsearch
