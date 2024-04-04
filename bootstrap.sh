@@ -15,7 +15,7 @@ if [ -z "${ES_PASSWORD}" ]; then
     exit 1
 fi
 
-for filepath in pipelines/*.yml; 
+for filepath in elk/pipelines/*.yml; 
 do 
     filename=$(basename "${filepath}"); 
     pipeline_name="${filename%.*}"
@@ -26,7 +26,7 @@ do
     echo ""
 done
 
-for filepath in indices/*.yml; 
+for filepath in elk/indices/*.yml; 
 do 
     filename=$(basename "${filepath}"); 
     index_name="${filename%.*}"

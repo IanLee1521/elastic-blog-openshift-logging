@@ -1,2 +1,3 @@
+---
 settings:
   index.default_pipeline: audit-write-reroute-pipeline
